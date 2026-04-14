@@ -1,0 +1,25 @@
+{
+  "name": "BizSim.Google.Play.InstallReferrer.InputSystem",
+  "rootNamespace": "BizSim.Google.Play.InstallReferrer.InputSystemSupport",
+  "references": [
+    "Unity.InputSystem",
+    "BizSim.Google.Play.InstallReferrer"
+  ],
+  "includePlatforms": ["Android", "Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "ENABLE_INPUT_SYSTEM"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.inputsystem",
+      "expression": "",
+      "define": "ENABLE_INPUT_SYSTEM"
+    }
+  ],
+  "noEngineReferences": false
+}

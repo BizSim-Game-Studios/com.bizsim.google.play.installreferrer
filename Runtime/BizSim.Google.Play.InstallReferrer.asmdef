@@ -1,0 +1,25 @@
+{
+  "name": "BizSim.Google.Play.InstallReferrer",
+  "rootNamespace": "BizSim.Google.Play.InstallReferrer",
+  "references": [],
+  "includePlatforms": ["Android", "Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [
+    {
+      "name": "com.google.firebase.analytics",
+      "expression": "",
+      "define": "BIZSIM_FIREBASE"
+    },
+    {
+      "name": "com.unity.inputsystem",
+      "expression": "",
+      "define": "ENABLE_INPUT_SYSTEM"
+    }
+  ],
+  "noEngineReferences": false
+}

@@ -1,0 +1,25 @@
+{
+  "name": "BizSim.Google.Play.InstallReferrer.UniTask",
+  "rootNamespace": "BizSim.Google.Play.InstallReferrer.UniTaskSupport",
+  "references": [
+    "UniTask",
+    "BizSim.Google.Play.InstallReferrer"
+  ],
+  "includePlatforms": ["Android", "Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "INSTALLREFERRER_UNITASK"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.cysharp.unitask",
+      "expression": "",
+      "define": "INSTALLREFERRER_UNITASK"
+    }
+  ],
+  "noEngineReferences": false
+}

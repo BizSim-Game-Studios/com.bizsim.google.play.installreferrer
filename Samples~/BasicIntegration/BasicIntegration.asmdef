@@ -1,0 +1,16 @@
+{
+  "name": "BizSim.Google.Play.InstallReferrer.Samples.BasicIntegration",
+  "rootNamespace": "BizSim.Google.Play.InstallReferrer.Samples",
+  "references": [
+    "BizSim.Google.Play.InstallReferrer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

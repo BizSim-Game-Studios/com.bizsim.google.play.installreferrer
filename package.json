@@ -1,0 +1,46 @@
+{
+  "name": "com.bizsim.google.play.installreferrer",
+  "displayName": "BizSim Google Play Install Referrer Bridge",
+  "description": "Unity bridge for the Google Play Install Referrer API (v2.2). Provides Java-to-C# integration for install attribution, UTM campaign tracking, and referrer data caching.",
+  "version": "1.0.0",
+  "unity": "6000.0",
+  "changelogUrl": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer/blob/main/CHANGELOG.md",
+  "documentationUrl": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer/blob/main/README.md",
+  "author": {
+    "name": "BizSim Game Studios",
+    "url": "https://github.com/BizSim-Game-Studios"
+  },
+  "contributors": [
+    {
+      "name": "Aşkın Ceyhan",
+      "url": "https://github.com/AskinCeyhan"
+    }
+  ],
+  "company": "BizSim Game Studios",
+  "homepage": "https://www.bizsim.com",
+  "license": "MIT",
+  "keywords": [
+    "google-play",
+    "install-referrer",
+    "attribution",
+    "utm",
+    "android"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer.git"
+  },
+  "samples": [
+    {
+      "displayName": "Basic Integration",
+      "description": "Minimal install referrer fetch with caching and analytics logging.",
+      "path": "Samples~/BasicIntegration"
+    },
+    {
+      "displayName": "Mock Config Presets",
+      "description": "Pre-configured mock configs for common UTM scenarios (organic, campaign, fake referrer, error).",
+      "path": "Samples~/MockPresets"
+    }
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,19 @@
+{
+  "name": "BizSim.Google.Play.InstallReferrer.Editor",
+  "rootNamespace": "BizSim.Google.Play.InstallReferrer.Editor",
+  "references": [
+    "BizSim.Google.Play.InstallReferrer",
+    "BizSim.Google.Play.Editor.Core"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
