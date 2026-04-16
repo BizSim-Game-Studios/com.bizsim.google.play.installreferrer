@@ -15,6 +15,6 @@ namespace BizSim.Google.Play.InstallReferrer
     internal static class PackageVersion
     {
         /// <summary>Current package version — must match <c>package.json</c>.</summary>
-        public const string Current = "1.0.0";
+        public const string Current = "1.0.1";
     }
 }

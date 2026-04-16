@@ -2,7 +2,7 @@
   "name": "BizSim.Google.Play.InstallReferrer",
   "rootNamespace": "BizSim.Google.Play.InstallReferrer",
   "references": [],
-  "includePlatforms": ["Android", "Editor"],
+  "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
