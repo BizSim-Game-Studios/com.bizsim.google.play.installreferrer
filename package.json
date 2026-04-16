@@ -2,7 +2,7 @@
   "name": "com.bizsim.google.play.installreferrer",
   "displayName": "BizSim Google Play Install Referrer Bridge",
   "description": "Unity bridge for the Google Play Install Referrer API (v2.2). Provides Java-to-C# integration for install attribution, UTM campaign tracking, and referrer data caching.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "unity": "6000.0",
   "changelogUrl": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer/blob/main/CHANGELOG.md",
   "documentationUrl": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer/blob/main/README.md",
