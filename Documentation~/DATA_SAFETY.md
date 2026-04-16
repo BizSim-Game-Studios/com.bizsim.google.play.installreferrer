@@ -1,74 +1,41 @@
-# Data Safety Declaration
+# Data Safety
 
-This document describes the data practices of the **Google Play Install Referrer Bridge** package
-(`com.bizsim.google.play.installreferrer`) for compliance with Google Play Data Safety requirements.
+## Play Store Data Safety Form Guidance
+
+This document describes what data flows through `com.bizsim.google.play.installreferrer` to help consumers fill out the Google Play Store Data Safety form.
 
 ## Data Collected
 
-| Data Type | Collected? | Shared? | Purpose | Retention |
-|-----------|-----------|---------|---------|-----------|
-| Referrer URL | Yes (from Google Play Install Referrer API) | No | Install attribution | Cached in `PlayerPrefs` (90-day TTL) |
-| UTM parameters | Derived locally from referrer URL | No | Campaign tracking | Cached in `PlayerPrefs` (90-day TTL) |
-| Install timestamps | Yes (from Google Play Install Referrer API) | No | Attribution timing | Cached in `PlayerPrefs` (90-day TTL) |
-| Install version | Yes (from Google Play Install Referrer API) | No | Version tracking | Cached in `PlayerPrefs` (90-day TTL) |
-| App install time | Yes (from `PackageManager`) | No | Cache invalidation on reinstall | Cached in `PlayerPrefs` |
-| API call success/error | Yes (if analytics adapter is injected) | Per adapter implementation | Technical monitoring | Per adapter retention policy |
+| Data Type | Collected | Persisted | Transmitted | Purpose |
+|-----------|-----------|-----------|-------------|---------|
+| Install referrer URL | Yes | Yes (encrypted, local) | No | Install attribution |
+| UTM parameters | Yes (parsed from referrer URL) | Yes (encrypted, local) | No | Campaign tracking |
+| Referrer click timestamp | Yes | Yes (encrypted, local) | No | Attribution timing |
+| Install begin timestamp | Yes | Yes (encrypted, local) | No | Attribution timing |
+| Google Play Instant flag | Yes | Yes (encrypted, local) | No | Install type detection |
 
-## Data NOT Collected
+## How Data Flows
 
-- ❌ No personal information (name, email, phone)
-- ❌ No device identifiers (IMEI, advertising ID)
-- ❌ No location data
-- ❌ No financial information
-- ❌ No health or fitness data
-- ❌ No browsing history or search queries
+1. **Collection:** The package calls `InstallReferrerClient.getInstallReferrer()` via JNI. The Play Store returns the referrer string and timestamps. This data originates from Google Play, not from the user's device sensors.
 
-## Key Privacy Principles
+2. **Local persistence:** Referrer data is cached locally using `EncryptedPlayerPrefsCacheProvider` (AES-encrypted PlayerPrefs). The cache has a configurable TTL (default 24 hours). Cache invalidation occurs on app reinstall, SDK version change, or manual clear.
 
-### 1. Local IPC Only — No External Network Requests
-The Google Play Install Referrer API is a **local IPC call** to the Google Play Store app
-on the device. This package does not make any HTTP requests or connect to any external servers.
-All data retrieval happens on-device via Android's `AIDL` binding mechanism.
+3. **Transmission:** This package does NOT transmit referrer data to any server. If the consuming app sends referrer data to its own backend (e.g., via the `IInstallReferrerAnalyticsAdapter`), that transmission is the app's responsibility to declare.
 
-### 2. Immutable Install-Time Data
-Referrer data is set **once at install time** and never changes. It captures the attribution
-link that led to the install (e.g., ad campaign UTM parameters). This data cannot be
-updated or modified after the initial install.
+## GDPR Compliance
 
-### 3. Cache Invalidation
-Cached data is automatically invalidated when:
-- The cache exceeds the **90-day TTL**
-- The app is **reinstalled** (detected via `PackageManager.firstInstallTime`)
-- The **SDK version changes** (detected via `PackageVersion.Current`)
+The package provides `SetConsentGranted(bool)` on the controller. When consent is not granted:
+- No connection to the Play Store is made
+- No referrer data is read or cached
+- The controller returns a `ConsentNotGranted` error immediately
 
-### 4. Consent Management
-The controller supports explicit consent management via `SetConsentGranted()`:
-- `SetConsentGranted(false)` — clears all cached data and blocks future API calls
-- `ClearCachedData()` — deletes cached referrer data without affecting consent state
+## Play Store Form Entries
 
-### 5. Data Minimization
-The `IInstallReferrerAnalyticsAdapter` interface provides two logging methods:
-- `LogReferrerFetched()` — full data logging (for internal analytics)
-- `LogReferrerFetchedMinimal()` — logs only `utm_source`, `utm_medium`, `utm_campaign`, and `IsOrganic`
+Based on the data above, consumers should declare:
 
-## Google Play Data Safety Form
-
-When filling out the [Data Safety form](https://support.google.com/googleplay/android-developer/answer/10787469) in Google Play Console:
-
-| Question | Answer |
-|----------|--------|
-| Does your app collect or share user data? | Yes |
-| Data type | Other app info and performance → Other diagnostic data |
-| Is the data collected, shared, or both? | Collected only |
-| Is data processing ephemeral? | No — cached locally for 90 days |
-| Is data collection required or optional? | Optional (can be disabled via `SetConsentGranted(false)`) |
-| Purpose | Analytics — install attribution and campaign tracking |
-| Encrypted in transit? | N/A — local IPC only, no network transit |
-| Encrypted at rest? | Yes (if `_useEncryptedCache` is enabled) |
-| Users can request deletion? | Yes (via `ClearCachedData()` or `SetConsentGranted(false)`) |
-
-## Contact
-
-For privacy-related questions about this package:
-- **Author:** Aşkın Ceyhan (https://github.com/AskinCeyhan)
-- **Company:** BizSim Game Studios (https://www.bizsim.com)
+- **Data type:** Other > Install referrer
+- **Collected:** Yes
+- **Shared with third parties:** No (unless your app transmits it)
+- **Processing purpose:** Analytics (install attribution)
+- **Is data encrypted in transit:** N/A (no network transmission by this package)
+- **Can users request data deletion:** Yes (via `ClearCache()` or app uninstall)
