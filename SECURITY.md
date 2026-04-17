@@ -25,4 +25,5 @@ This package handles install attribution data with the following security consid
 - **UTM parameters** are user-visible in referral links — never encode rewards or secrets in them
 - **Cache storage** supports optional encryption (`_useEncryptedCache` toggle)
 - **GDPR compliance** — `ClearCachedData()` and `SetConsentGranted(false)` for data erasure
+- **Consent persistence (v1.0.3+)** — `ConsentGranted` state persists across app restarts via `PlayerPrefs` key `BizSim.InstallReferrer.ConsentGranted`. Revoking consent via `SetConsentGranted(false)` survives process termination, domain reload, and device reboot. Prior to v1.0.3 the flag was in-memory only and silently reset to `true` on each boot — a GDPR right-to-erasure gap. Defaults to `true` on fresh install for backward compatibility; consumers must explicitly call `SetConsentGranted(true)` to re-grant after revocation.
 - **ProGuard rules** are embedded to prevent reverse engineering of the Java bridge

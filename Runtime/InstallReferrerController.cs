@@ -103,7 +103,14 @@ namespace BizSim.Google.Play.InstallReferrer
 
         // --- Privacy & Consent ---
 
-        /// <summary>Whether the user has granted consent for referrer data collection. Defaults to true for backward compatibility.</summary>
+        /// <summary>
+        /// PlayerPrefs key for persisting ConsentGranted across app restarts (GDPR right-to-erasure).
+        /// Default value (missing key) is <c>true</c> for backward compatibility with consumers
+        /// who relied on the v1.0.2-and-earlier in-memory-only default.
+        /// </summary>
+        private const string ConsentGrantedPrefsKey = "BizSim.InstallReferrer.ConsentGranted";
+
+        /// <summary>Whether the user has granted consent for referrer data collection. Persisted to PlayerPrefs since v1.0.3. Defaults to true on fresh install.</summary>
         public bool ConsentGranted { get; private set; } = true;
 
         // --- Pluggable services ---
@@ -163,6 +170,10 @@ namespace BizSim.Google.Play.InstallReferrer
             // Auto-set encrypted cache provider if enabled and no custom provider is set
             if (_useEncryptedCache && _cacheProvider == null)
                 _cacheProvider = new EncryptedPlayerPrefsCacheProvider();
+
+            // Read persisted ConsentGranted state (GDPR right-to-erasure: revocation survives restart).
+            // Default 1 (true) on missing key — backward compat with v1.0.2-and-earlier consumers.
+            ConsentGranted = PlayerPrefs.GetInt(ConsentGrantedPrefsKey, 1) == 1;
 
             LoadCache();
         }
@@ -237,6 +248,9 @@ namespace BizSim.Google.Play.InstallReferrer
         public void SetConsentGranted(bool granted)
         {
             ConsentGranted = granted;
+            // Persist across app restarts (GDPR right-to-erasure — v1.0.3+).
+            PlayerPrefs.SetInt(ConsentGrantedPrefsKey, granted ? 1 : 0);
+            PlayerPrefs.Save();
             if (!granted)
                 ClearCachedData();
         }
