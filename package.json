@@ -2,7 +2,7 @@
   "name": "com.bizsim.google.play.installreferrer",
   "displayName": "BizSim Google Play Install Referrer",
   "description": "Unity package for Google Play Install Referrer API (v2.2). Install attribution and UTM campaign tracking with connect-read-disconnect state machine, local caching, and GDPR consent toggle.",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "unity": "6000.0",
   "changelogUrl": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer/blob/main/CHANGELOG.md",
   "documentationUrl": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer/blob/main/README.md",

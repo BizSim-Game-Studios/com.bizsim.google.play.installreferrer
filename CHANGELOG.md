@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-17
+
+### Added
+- **K8 PackageVersion schema unification (Plan G).** Three new `public const string` fields on `PackageVersion`: `NativeSdkVersion` (`"2.2"`), `NativeSdkLabel` (`"Install Referrer"`), `NativeSdkArtifactCoord` (`"com.android.installreferrer:installreferrer:2.2"`). First introduction for this package — the `NativeSdkLabel` correctly identifies Install Referrer as its own SDK family (NOT "Play Core") in the dashboard. See `development-plans/plans/2026-04-17-enterprise-quality-bar/06-conventions/06-package-version-schema.md`.
+- `PackageVersionSchemaTest` drift guard.
+
 ## [1.0.3] - 2026-04-17
 
 ### Fixed
