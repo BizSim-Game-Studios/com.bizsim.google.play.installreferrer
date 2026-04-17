@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-04-17
+
+### Fixed
+- **GDPR right-to-erasure: `ConsentGranted` now persists across app restarts** (C2.2 compliance). `InstallReferrerController.SetConsentGranted(bool)` writes the flag to `PlayerPrefs` key `BizSim.InstallReferrer.ConsentGranted`; `Awake()` reads it on controller init. Prior to this release, revocations (`SetConsentGranted(false)`) were in-memory only and silently reset to `true` on the next app boot — a GDPR Article 17 compliance gap. Defaults to `true` on fresh install for backward compat with v1.0.2-and-earlier consumers. Added `ConsentPersistenceTest` (4 assertions: set-false, set-true, default-true, key-namespacing). `SECURITY.md` updated with persistence documentation.
+
 ## [1.0.2] - 2026-04-16
 
 ### Added
