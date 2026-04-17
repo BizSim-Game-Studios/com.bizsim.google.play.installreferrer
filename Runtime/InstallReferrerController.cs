@@ -767,11 +767,74 @@ namespace BizSim.Google.Play.InstallReferrer
         }
 
         /// <summary>
-        /// Clears the cached referrer data. Call this to force a fresh fetch on next request.
+        /// Clears the cached referrer data (session-level). Call this to force
+        /// a fresh fetch on next request. Preserves the per-install encryption
+        /// key identifier and the persisted <c>ConsentGranted</c> flag.
         /// </summary>
+        /// <remarks>
+        /// For true GDPR Article 17 right-to-erasure (all package data wiped
+        /// from the device, consent set to false and persisted), call
+        /// <see cref="ForgetAll"/> instead.
+        /// </remarks>
         public void ClearCachedData()
         {
             ClearCache(CacheInvalidationReason.ManualClear);
+        }
+
+        /// <summary>
+        /// GDPR Article 17 right-to-erasure: wipes every install-referrer
+        /// artifact from the device, including the cached referrer payload,
+        /// the per-install encryption key identifier (when using the encrypted
+        /// provider), the legacy plain-JSON cache key, and the persisted
+        /// <c>ConsentGranted</c> preference. In-memory <see cref="CachedData"/>
+        /// is cleared and <see cref="ConsentGranted"/> is persisted as
+        /// <c>false</c> — the caller must explicitly re-grant consent via
+        /// <see cref="SetConsentGranted"/> before any subsequent fetch will
+        /// run. After this call the package behaves as if freshly installed,
+        /// except consent stays revoked across restarts until explicitly
+        /// re-granted.
+        /// </summary>
+        /// <remarks>
+        /// Distinct from <see cref="ClearCachedData"/>, which performs only a
+        /// session-level clear and preserves the encryption key id plus the
+        /// consent preference. Invoking <c>ForgetAll</c> makes any payload
+        /// encrypted under the old key permanently unrecoverable — the next
+        /// <c>Save</c> generates a fresh per-install GUID. No referrer
+        /// details are logged — only a technical "forget_invoked" entry.
+        /// </remarks>
+        public void ForgetAll()
+        {
+            // Legacy plain-JSON cache path (CACHE_PREFS_KEY). ClearCache below
+            // also covers this for the default (non-custom) provider, but an
+            // explicit DeleteKey guards against stale data when a custom
+            // provider is wired up that doesn't touch CACHE_PREFS_KEY.
+            PlayerPrefs.DeleteKey(CACHE_PREFS_KEY);
+
+            // Session-level clear first — routes through ClearCache so the
+            // OnCacheInvalidated event fires for any subscriber (analytics
+            // logs a "forget_invoked" entry via its own adapter logic).
+            ClearCache(CacheInvalidationReason.ManualClear);
+
+            // For the shipped encrypted provider, also erase the per-install
+            // encryption key identifier. Custom providers that store extra
+            // metadata should be erased by the consumer.
+            if (_cacheProvider is EncryptedPlayerPrefsCacheProvider epp)
+                epp.EraseAll();
+
+            // Persist consent=false across restarts. This is the GDPR-correct
+            // semantic: after the user invokes right-to-erasure, consent must
+            // NOT silently re-grant on next launch via the default=true
+            // path. Explicit SetConsentGranted(true) is required to re-enable.
+            ConsentGranted = false;
+            PlayerPrefs.SetInt(ConsentGrantedPrefsKey, 0);
+            PlayerPrefs.Save();
+
+            // In-memory state — caller expects CachedData to reflect the
+            // post-erasure state (no cached referrer).
+            CachedData = null;
+            _retryCount = 0;
+
+            BizSimLogger.Info("All install referrer data erased (forget_invoked)");
         }
 
         /// <summary>

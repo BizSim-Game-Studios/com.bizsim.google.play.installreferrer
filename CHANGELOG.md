@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-04-17
+
+### Added
+- **GDPR Article 17 Forget API (Wave 2).** New `InstallReferrerController.ForgetAll()` method performs complete right-to-erasure: clears the cached referrer payload via the active `IInstallReferrerCacheProvider`, erases the per-install encryption key identifier when the shipped `EncryptedPlayerPrefsCacheProvider` is in use, deletes the legacy plain-JSON `InstallReferrer_Cache` key, nulls the in-memory `CachedData`, AND persists `ConsentGranted = false` across restarts. The persistent-consent-false semantic is deliberate — after a user invokes right-to-erasure, the default-true path must not silently re-grant consent on next launch. Consumers must explicitly call `SetConsentGranted(true)` before any subsequent fetch will run.
+- **`EncryptedPlayerPrefsCacheProvider.EraseAll()`** public method — the engine behind `ForgetAll`. Deletes both the payload key (`InstallReferrer_Cache_Enc`) AND the per-install key id (`InstallReferrer_KeyId`) and invalidates the in-memory derived AES key. Consumers may call directly when implementing a dedicated "Delete my data" button.
+- `ForgetApiTest` drift guard (4 assertions): `EraseAll` deletes both keys, `Clear` preserves the key id, `EraseAll` is idempotent, post-erasure `Save` generates a fresh key id that differs from the erased one (prevents old-key decryption).
+
 ## [1.2.0] - 2026-04-17
 
 ### Added
