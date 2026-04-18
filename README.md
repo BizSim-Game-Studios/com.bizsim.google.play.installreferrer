@@ -23,16 +23,28 @@ Retrieves install attribution data including UTM parameters, install timestamps,
 
 ### Option 1: Git URL (recommended)
 
-1. In Unity Editor: **Window > Package Manager > + > Add package from git URL...**
-2. Enter:
-   ```
-   https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer.git
-   ```
+This package declares [EDM4U](https://github.com/googlesamples/unity-jar-resolver) as a transitive dependency, resolved via the **OpenUPM** scoped registry. Add the registry once and Unity Package Manager auto-installs EDM4U the first time you import any `com.bizsim.google.play.*` package.
 
-3. Or add directly to `Packages/manifest.json`:
-   ```json
-   "com.bizsim.google.play.installreferrer": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer.git"
-   ```
+Edit `Packages/manifest.json` and add the OpenUPM scoped registry plus the package:
+
+```json
+{
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google.external-dependency-manager"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.bizsim.google.play.installreferrer": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer.git#v1.4.0"
+  }
+}
+```
+
+> If you prefer the Package Manager UI, you MUST still add the OpenUPM scoped registry to `manifest.json` manually — the UI does not prompt for scoped registries of transitive deps. Then use **Window > Package Manager > + > Add package from git URL...** with the Git URL above.
 
 ### Option 2: Local path
 
