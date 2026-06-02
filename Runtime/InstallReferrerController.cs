@@ -125,7 +125,17 @@ namespace BizSim.Google.Play.InstallReferrer
         [SerializeField] private InstallReferrerMockConfig _mockConfig;
 #endif
 
-        // --- Test Mode (debug builds only, Android device) ---
+        // --- Test Mode (debug builds only, Android device + Editor mock path) ---
+        // The Runtime asmdef is includePlatforms: [] (per ADR-014; re-tightening to
+        // ["Android","Editor"] reintroduces a consumer-side CS0246 during Addressables
+        // content builds). Because the asmdef is unrestricted this file compiles on every
+        // target, so the field-level #if below is the complete CS0414 fix by itself: its
+        // predicate (UNITY_ANDROID || UNITY_EDITOR) is the union of the two read sites —
+        //   - `#if UNITY_ANDROID && !UNITY_EDITOR` block (Android player, on-device fake)
+        //   - `#if UNITY_EDITOR` inner block (editor mock Priority 1)
+        // so the field exists iff a read exists. Microsoft's documented CS0414 remedy
+        // (learn.microsoft.com/dotnet/csharp/misc/cs0414).
+#if UNITY_ANDROID || UNITY_EDITOR
         [Header("Test Mode (Debug Builds Only)")]
         [Tooltip("Enable to use a fake referrer string on-device. Only works in debug builds.")]
         [SerializeField] private bool _useFakeForTesting;
@@ -133,6 +143,7 @@ namespace BizSim.Google.Play.InstallReferrer
         [Tooltip("Fake referrer URL for on-device testing (e.g., 'utm_source=test&utm_medium=cpc').")]
         [TextArea(1, 3)]
         [SerializeField] private string _fakeReferrerUrl = "utm_source=test&utm_medium=cpc&utm_campaign=debug";
+#endif
 
         [Header("Privacy & Encryption")]
         [Tooltip("Enable AES-256-CBC encrypted cache storage. Uses device-unique key derivation.")]

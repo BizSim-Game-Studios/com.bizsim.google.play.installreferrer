@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-06-02
+
+### Fixed
+- **CS0414 "assigned but never used" warning** for the debug-only test-mode `[SerializeField]`s (`_useFakeForTesting`, `_fakeReferrerUrl`) in `InstallReferrerController`. Wrapped in a `#if UNITY_ANDROID || UNITY_EDITOR` gate whose predicate is the union of the two read-site predicates, so the field exists iff a read exists on every build target. The Runtime asmdef intentionally stays `includePlatforms: []` (ADR-014 — re-tightening to `["Android", "Editor"]` reintroduces a consumer-side CS0246 during Addressables content builds); the field-level gate alone is the complete fix.
+
 ## [1.4.0] - 2026-04-18
 
 ### Added
