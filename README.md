@@ -2,7 +2,7 @@
 
 [![Unity 6000.0+](https://img.shields.io/badge/Unity-6000.0%2B-blue.svg)](https://unity.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
-[![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.4.1-orange.svg)](CHANGELOG.md)
 
 Unity bridge for the [Google Play Install Referrer API](https://developer.android.com/google/play/installreferrer) (v2.2).
 Retrieves install attribution data including UTM parameters, install timestamps, and referrer URLs.
@@ -15,17 +15,16 @@ Retrieves install attribution data including UTM parameters, install timestamps,
 - **UTM Parsing** — Automatic extraction of `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`
 - **Smart Caching** — Persistent cache with `appInstallTime` + `sdkVersion` validation
 - **Retry Logic** — Exponential backoff (3 attempts) for transient failures
-- **Editor Testing** — Mock config ScriptableObject with preset scenarios
-- **Debug Menu** — Runtime IMGUI overlay for on-device testing
-- **Pluggable Architecture** — Interfaces for analytics, caching, and DI support
+- **Mock provider** — ScriptableObject presets covering organic, campaign, fake referrer, and error scenarios for editor + non-Android builds
+- **Analytics adapter** — Optional `IInstallReferrerAnalyticsAdapter` with a Firebase implementation guarded by `BIZSIM_FIREBASE`
+- **UniTask support** — Optional extension assembly guarded by `BIZSIM_UNITASK`
+- **Editor integration** — Auto-registered `BIZSIM_INSTALLREFERRER_INSTALLED` define via `editor.core`
 
 ## Installation
 
-### Option 1: Git URL (recommended)
+This package depends on Google's [External Dependency Manager for Unity (EDM4U)](https://github.com/googlesamples/unity-jar-resolver), which is published to the OpenUPM scoped registry. Add EDM4U's registry to your project's `Packages/manifest.json` once, then add this package as a Git URL — UPM will auto-install EDM4U on first import.
 
-This package declares [EDM4U](https://github.com/googlesamples/unity-jar-resolver) as a transitive dependency, resolved via the **OpenUPM** scoped registry. Add the registry once and Unity Package Manager auto-installs EDM4U the first time you import any `com.bizsim.google.play.*` package.
-
-Edit `Packages/manifest.json` and add the OpenUPM scoped registry plus the package:
+**Step 1 — Add the OpenUPM scoped registry (one-time per project):**
 
 ```json
 {
@@ -37,42 +36,35 @@ Edit `Packages/manifest.json` and add the OpenUPM scoped registry plus the packa
         "com.google.external-dependency-manager"
       ]
     }
-  ],
+  ]
+}
+```
+
+If you already have other OpenUPM-distributed packages, you may already have this registry — just add `com.google.external-dependency-manager` to the existing `scopes` array.
+
+**Step 2 — Install this package via Git URL:**
+
+```json
+{
   "dependencies": {
-    "com.bizsim.google.play.installreferrer": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer.git#v1.4.0"
+    "com.bizsim.google.play.installreferrer": "https://github.com/BizSim-Game-Studios/com.bizsim.google.play.installreferrer.git#v1.4.1"
   }
 }
 ```
 
-> If you prefer the Package Manager UI, you MUST still add the OpenUPM scoped registry to `manifest.json` manually — the UI does not prompt for scoped registries of transitive deps. Then use **Window > Package Manager > + > Add package from git URL...** with the Git URL above.
-
-### Option 2: Local path
-
-```json
-"com.bizsim.google.play.installreferrer": "file:../path/to/com.bizsim.google.play.installreferrer"
-```
-
-### After Installation
-
-1. In Unity Editor: **Assets > External Dependency Manager > Android Resolver > Force Resolve**
-2. (Optional) Add `BIZSIM_FIREBASE` to **Scripting Define Symbols** for Firebase Analytics integration
+After the package imports, EDM4U is automatically resolved by UPM — no manual `.unitypackage` import required. EDM4U then resolves the Android Maven dependency declared in `Editor/Dependencies.xml` (`com.android.installreferrer:installreferrer:2.2`) at the next Android build, or immediately via `Assets → External Dependency Manager → Android Resolver → Force Resolve`.
 
 ## Quick Start
 
-2. Add `InstallReferrerController` to a persistent GameObject.
+1. Add `InstallReferrerController` to a persistent GameObject (or access the `Instance` singleton).
 
-3. Fetch referrer data:
+2. Fetch referrer data:
    ```csharp
    var data = await InstallReferrerController.Instance.FetchInstallReferrerAsync();
    Debug.Log($"Source: {data.UtmSource}, Campaign: {data.UtmCampaign}");
    ```
 
-## Requirements
-
-- Unity 6000.0 or later
-- Android target platform
-- **[EDM4U](https://github.com/googlesamples/unity-jar-resolver) (External Dependency Manager for Unity)** — required to resolve the native Android dependency `com.android.installreferrer:installreferrer:2.2` at build time. Without EDM4U, the Maven artifact will not be included and you'll get `ClassNotFoundException` at runtime.
-- Google Play Install Referrer library 2.2 (resolved automatically via `Editor/Dependencies.xml`)
+3. Referrer data is cached automatically after the first successful fetch — subsequent calls return the cached result without re-querying Google Play.
 
 ## Use Cases
 
@@ -104,6 +96,13 @@ if (!data.IsOrganic && data.UtmCampaign == "invite")
 
 > **⚠️ Security Note:** Never encode reward types, amounts, or bonus identifiers in UTM parameters. Referral links are user-visible and trivially editable. Use UTM data only for **identification** (who invited, which campaign) — all reward logic must live server-side or in game config.
 
+## Requirements
+
+- Unity 6000.0 or later
+- Android target platform
+- **[EDM4U](https://github.com/googlesamples/unity-jar-resolver) (External Dependency Manager for Unity)** — auto-resolved via OpenUPM scoped registry (see Installation)
+- Google Play Install Referrer library 2.2 (resolved automatically via `Editor/Dependencies.xml`)
+
 ## Google Play Data Safety
 
 ### Data Collected
@@ -123,18 +122,6 @@ This package collects the following data via the [Google Play Install Referrer A
 - **No data is shared** with third parties — all data stays on-device in local cache
 - **No network calls** are made by this package (the referrer API is a local IPC call to Google Play)
 
-### Local Cache
-
-- Referrer data is cached locally in `PlayerPrefs` (or encrypted `PlayerPrefs` if `_useEncryptedCache` is enabled)
-- Cache has a **90-day TTL** — referrer data is immutable per install, so a long TTL is safe
-- Cache is invalidated on app reinstall or SDK version change
-
-### GDPR Compliance
-
-- **Right to erasure**: Call `ClearCachedData()` to delete all cached referrer data
-- **Consent management**: Call `SetConsentGranted(false)` to revoke consent — this also clears cached data and blocks future fetches
-- **Data minimization**: Use `LogReferrerFetchedMinimal()` analytics adapter method to log only `utm_source`, `utm_medium`, `utm_campaign`, and `IsOrganic` — excluding raw URLs, timestamps, and granular UTM fields
-
 ### Play Console Data Safety Form
 
 When filling out the [Data Safety form](https://support.google.com/googleplay/android-developer/answer/10787469) in Google Play Console:
@@ -144,6 +131,8 @@ When filling out the [Data Safety form](https://support.google.com/googleplay/an
 3. **Shared with third parties**: No
 4. **Encrypted**: Yes (if `_useEncryptedCache` is enabled)
 5. **Users can request deletion**: Yes (via `ClearCachedData()` / `SetConsentGranted(false)`)
+
+> **GDPR right to erasure:** Call `ClearCachedData()` to delete all cached referrer data. Call `SetConsentGranted(false)` to revoke consent — this also clears cached data and blocks future fetches. Use `LogReferrerFetchedMinimal()` on the analytics adapter to log only `utm_source`, `utm_medium`, `utm_campaign`, and `IsOrganic`, excluding raw URLs, timestamps, and granular UTM fields.
 
 ## License
 
@@ -156,7 +145,5 @@ This package does **not** bundle any Google SDK binaries. The native Android dep
 | Dependency | Version | License |
 |-----------|---------|---------|
 | `com.android.installreferrer:installreferrer` | 2.2 | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) |
-
-The Install Referrer library provides access to Google Play's Install Referrer API via local IPC. It makes no network calls — all communication happens between your app and the Google Play Store app on the device.
 
 For full third-party license details, see [NOTICES.md](NOTICES.md).
